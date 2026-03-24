@@ -21,7 +21,7 @@ export function SiteHeader() {
     <header className="site-header">
       <Link className="brand-link" href="/">
         <span className="brand-mark">GN</span>
-        <div>
+        <div className="brand-copy">
           <strong>Gamesnight Finder</strong>
           <p>Student nights, live seats.</p>
         </div>
@@ -43,7 +43,7 @@ export function SiteHeader() {
         {isReady && session ? (
           <>
             <span className="user-dot">{session.user.username.slice(0, 1).toUpperCase()}</span>
-            <span>{session.user.username}</span>
+            <span className="auth-name">{session.user.username}</span>
             <button
               className="button-ghost"
               disabled={isPending}

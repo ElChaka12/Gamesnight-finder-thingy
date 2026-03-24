@@ -22,11 +22,15 @@
 
 html {
   scroll-behavior: smooth;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  max-width: 100%;
+  overflow-x: hidden;
   color: var(--text);
   font-family: var(--body-font);
   background:
@@ -73,6 +77,15 @@ button:disabled {
 img {
   display: block;
   max-width: 100%;
+}
+
+.site-header > *,
+.landing-hero > *,
+.auth-hero > *,
+.host-shell > *,
+.discover-head > *,
+.discover-grid > * {
+  min-width: 0;
 }
 
 .app-frame {
@@ -151,6 +164,7 @@ img {
 .site-nav {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 1.5rem;
 }
 
@@ -174,7 +188,17 @@ img {
 .auth-chip {
   display: inline-flex;
   align-items: center;
+  justify-self: end;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.6rem;
+}
+
+.auth-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .header-link,
@@ -527,9 +551,15 @@ img {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  width: 100%;
+  max-width: 520px;
   padding: 0.5rem;
   border-radius: 999px;
   background: var(--panel-strong);
+}
+
+.search-pill button {
+  flex-shrink: 0;
 }
 
 .search-pill input {
@@ -698,6 +728,7 @@ img {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 1rem;
+  align-items: stretch;
 }
 
 .discovery-card,
@@ -793,6 +824,10 @@ img {
   align-items: center;
 }
 
+.card-action-row > * {
+  min-width: 0;
+}
+
 .featured-meta {
   margin-bottom: 0.8rem;
   color: var(--primary);
@@ -841,6 +876,15 @@ img {
   display: grid;
   gap: 0.85rem;
   align-content: center;
+}
+
+.featured-overlay p,
+.spotlight-card p,
+.compact-card p,
+.wide-content p,
+.featured-meta span:last-child,
+.card-action-row span {
+  overflow-wrap: anywhere;
 }
 
 .discover-empty {
@@ -914,19 +958,37 @@ img {
 
   .site-nav {
     justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
   }
 
   .auth-chip {
     justify-content: flex-start;
   }
+
+  .site-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hero-image-frame {
+    min-height: 420px;
+  }
+
+  .host-image-card {
+    min-height: 460px;
+  }
 }
 
 @media (max-width: 760px) {
   .app-frame {
-    width: min(100% - 1rem, 100%);
+    width: min(calc(100% - 1rem), 100%);
+    padding-bottom: 1rem;
   }
 
   .page-shell {
+    gap: 1rem;
     padding-top: 1rem;
   }
 
@@ -939,7 +1001,7 @@ img {
 
   .hero-image-frame,
   .host-image-card {
-    min-height: 340px;
+    min-height: 320px;
   }
 
   .site-header,
@@ -953,6 +1015,44 @@ img {
   .create-cta-card,
   .discover-empty {
     border-radius: 1.5rem;
+  }
+
+  .site-header {
+    top: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.95rem;
+    gap: 0.8rem;
+  }
+
+  .brand-link {
+    gap: 0.75rem;
+  }
+
+  .brand-copy p {
+    display: none;
+  }
+
+  .brand-mark,
+  .user-dot {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .site-nav {
+    gap: 1rem;
+    margin: 0 -0.15rem;
+    padding-inline: 0.15rem;
+  }
+
+  .nav-link {
+    white-space: nowrap;
+  }
+
+  .auth-chip {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.7rem 0.85rem;
   }
 
   .host-form-grid,
@@ -969,19 +1069,152 @@ img {
     grid-template-columns: 1fr;
   }
 
+  .inline-actions > * {
+    width: 100%;
+  }
+
+  .avatar-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .avatar-badge {
+    width: 40px;
+    height: 40px;
+  }
+
   .search-pill {
     flex-direction: column;
     align-items: stretch;
     border-radius: 1.5rem;
+    max-width: none;
   }
 
   .search-pill input {
     min-width: 0;
   }
 
+  .search-pill .button-accent,
+  .card-action-row .button-accent,
+  .card-action-row .button-outline,
+  .card-action-row .button-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-chip {
+    width: 100%;
+    text-align: center;
+  }
+
+  .featured-card {
+    min-height: 320px;
+  }
+
+  .featured-overlay {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+  }
+
+  .featured-overlay h2 {
+    font-size: clamp(1.7rem, 8.6vw, 2.5rem);
+  }
+
+  .floating-chip {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    padding: 0.85rem 0.95rem;
+  }
+
+  .tilt-right {
+    transform: none;
+  }
+
+  .host-float-card {
+    right: 1rem;
+    bottom: 1rem;
+    width: auto;
+    max-width: calc(100% - 2rem);
+    transform: none;
+  }
+
+  .host-float-card h2 {
+    font-size: 1.6rem;
+  }
+
+  .host-form-card,
+  .auth-card {
+    padding: 1.25rem;
+  }
+
+  .pill-switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .pill-switch button {
+    width: 100%;
+  }
+
+  .hype-copy {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.1rem 1rem;
+  }
+
   .brand-link,
   .site-nav,
   .auth-chip {
-    justify-content: space-between;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-copy h1,
+  .auth-copy h1,
+  .discover-head h1,
+  .host-heading h1 {
+    font-size: clamp(2.25rem, 13vw, 3.35rem);
+  }
+
+  .hero-image-frame,
+  .host-image-card {
+    min-height: 260px;
+  }
+
+  .featured-card {
+    min-height: 280px;
+  }
+
+  .landing-cta {
+    padding: 2rem 1rem;
+  }
+
+  .search-pill,
+  .site-header {
+    border-radius: 1.25rem;
+  }
+
+  .filter-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-links {
+    width: 100%;
   }
 }
