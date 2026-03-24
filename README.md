@@ -10,10 +10,12 @@ This repository uses:
 
 The project already includes:
 
-- A styled landing page for students
+- A multi-page Next.js frontend
 - A Django admin panel
-- A `GameNight` model and seeded demo events
-- A REST API the frontend can read from
+- Student registration and login with username and password
+- A `GameNight` model with host and participant support
+- Session creation and join flows
+- A REST API the frontend reads from through Next.js route handlers
 - Basic tests for the backend
 
 ## Project Structure
@@ -27,6 +29,7 @@ Gamesnight-finder-thingy/
 |   `-- manage.py
 |-- frontend/                Next.js app
 |   |-- app/                 App Router pages and global styles
+|   |-- components/          Shared frontend components
 |   |-- lib/                 API helpers
 |   |-- .env.local.example   Example frontend environment file
 |   `-- package.json
@@ -44,15 +47,19 @@ The backend stores and serves game-night data.
 
 The frontend displays game nights for students.
 
-- It fetches data from the Django API
+- It is split into separate pages for home, auth, session browsing, and session creation
+- It fetches data from the Django API through Next.js route handlers
 - The API base URL is controlled by `frontend/.env.local`
-- If the backend is not running, the frontend falls back to local preview data so the page still loads
+- Students can register, log in, create sessions, and join existing sessions
 
 ## Main URLs
 
 When both servers are running locally:
 
 - Frontend: [http://127.0.0.1:3000](http://127.0.0.1:3000)
+- Login/Register page: [http://127.0.0.1:3000/auth](http://127.0.0.1:3000/auth)
+- Session browser: [http://127.0.0.1:3000/sessions](http://127.0.0.1:3000/sessions)
+- Create session page: [http://127.0.0.1:3000/sessions/new](http://127.0.0.1:3000/sessions/new)
 - Django admin: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
 - API health check: [http://127.0.0.1:8000/api/health/](http://127.0.0.1:8000/api/health/)
 - Game nights API: [http://127.0.0.1:8000/api/game-nights/](http://127.0.0.1:8000/api/game-nights/)
@@ -117,13 +124,15 @@ cd ..
 
 ### 5. Create An Admin User
 
-Do this if you want to log into Django admin and add or edit game nights.
+Do this if you want to log into Django admin and add or edit game nights manually.
 
 ```powershell
 cd backend
 py manage.py createsuperuser
 cd ..
 ```
+
+Students can also create their own accounts directly from the frontend auth page.
 
 ## How To Run The Program
 
@@ -152,13 +161,16 @@ npm.cmd run dev
 What this does:
 
 - Starts the frontend on `http://127.0.0.1:3000`
-- Loads live data from the Django backend if it is available
+- Serves the page routes and proxies frontend API requests to Django
 
 ### Open The Site
 
 Open:
 
 - [http://127.0.0.1:3000](http://127.0.0.1:3000) to see the student-facing site
+- [http://127.0.0.1:3000/auth](http://127.0.0.1:3000/auth) to register or log in
+- [http://127.0.0.1:3000/sessions](http://127.0.0.1:3000/sessions) to browse and join sessions
+- [http://127.0.0.1:3000/sessions/new](http://127.0.0.1:3000/sessions/new) to host a session
 - [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) to manage events in admin
 
 ## Backend Commands
@@ -224,7 +236,13 @@ http://127.0.0.1:8000/api
 Current API routes:
 
 - `GET /api/health/`
+- `POST /api/auth/register/`
+- `POST /api/auth/login/`
+- `GET /api/auth/me/`
+- `POST /api/auth/logout/`
 - `GET /api/game-nights/`
+- `POST /api/game-nights/`
+- `POST /api/game-nights/<id>/join/`
 
 Supported filters on `/api/game-nights/`:
 
@@ -286,7 +304,7 @@ npm.cmd run dev
 
 instead of `npm install` or `npm run dev`.
 
-### Frontend shows preview data instead of live API data
+### Frontend cannot load sessions
 
 Usually this means Django is not running or `API_BASE_URL` is incorrect.
 
@@ -318,14 +336,13 @@ py manage.py migrate
 
 Good next features for this project:
 
-1. Student authentication and profiles
-2. Host-only event creation from the frontend
-3. RSVP and seat booking
-4. Campus, date, and game filters
-5. Search
-6. Image uploads for events
-7. Postgres for production deployment
-8. Deployment for frontend and backend
+1. Student profiles beyond username-only auth
+2. Leave-session and session editing flows
+3. RSVP confirmations and notifications
+4. Campus, date, and advanced game filters
+5. Image uploads for events
+6. Postgres for production deployment
+7. Deployment for frontend and backend
 
 ## Quick Start Summary
 

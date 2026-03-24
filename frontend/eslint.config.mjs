@@ -5,6 +5,11 @@ const eslintConfig = [
   ...nextCoreWebVitals,
   ...nextTypeScript,
   {
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
+  {
     ignores: [".next/**", "node_modules/**", "next-env.d.ts"],
   },
 ];

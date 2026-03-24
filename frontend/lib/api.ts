@@ -1,107 +1,107 @@
-export type GameNight = {
-  id: number;
-  title: string;
-  game_title: string;
-  description: string;
-  host_name: string;
-  campus_name: string;
-  venue: string;
-  starts_at: string;
-  ends_at: string;
-  skill_level: string;
-  skill_level_label: string;
-  spots_total: number;
-  spots_taken: number;
-  available_spots: number;
-  is_featured: boolean;
-  contact_link: string;
+import type {
+  AuthResponse,
+  CreateGameNightPayload,
+  GameNight,
+  User,
+} from "@/lib/types";
+
+type ApiRequestOptions = {
+  method?: "GET" | "POST";
+  token?: string;
+  body?: object;
 };
 
-const FALLBACK_GAME_NIGHTS: GameNight[] = [
-  {
-    id: 1,
-    title: "Residence Hall Kickoff",
-    game_title: "Codenames",
-    description: "A light, loud opener for students trying to meet new people on week one.",
-    host_name: "Lebo",
-    campus_name: "Main Campus",
-    venue: "Tutu Hall Common Room",
-    starts_at: "2026-03-25T18:00:00+02:00",
-    ends_at: "2026-03-25T20:00:00+02:00",
-    skill_level: "beginner",
-    skill_level_label: "Beginner friendly",
-    spots_total: 10,
-    spots_taken: 4,
-    available_spots: 6,
-    is_featured: true,
-    contact_link: "https://example.com/gamenight/codenames",
-  },
-  {
-    id: 2,
-    title: "Strategy Society Friday Table",
-    game_title: "Catan",
-    description: "A strategy night with just enough chaos to feel like a proper campus rivalry.",
-    host_name: "Aiden",
-    campus_name: "Engineering Campus",
-    venue: "Innovation Hub Atrium",
-    starts_at: "2026-03-27T18:00:00+02:00",
-    ends_at: "2026-03-27T21:00:00+02:00",
-    skill_level: "mixed",
-    skill_level_label: "Mixed skill levels",
-    spots_total: 6,
-    spots_taken: 5,
-    available_spots: 1,
-    is_featured: true,
-    contact_link: "https://example.com/gamenight/catan",
-  },
-  {
-    id: 3,
-    title: "Late-Night Bluffing Club",
-    game_title: "Blood on the Clocktower",
-    description: "A bigger social-deduction table for students who want an event with some theatre.",
-    host_name: "Nandi",
-    campus_name: "South Campus",
-    venue: "Student Centre Rooftop",
-    starts_at: "2026-03-29T19:00:00+02:00",
-    ends_at: "2026-03-29T22:00:00+02:00",
-    skill_level: "competitive",
-    skill_level_label: "Competitive table",
-    spots_total: 12,
-    spots_taken: 7,
-    available_spots: 5,
-    is_featured: false,
-    contact_link: "https://example.com/gamenight/clocktower",
-  },
-];
+function parseApiError(payload: unknown) {
+  if (typeof payload === "string" && payload) {
+    return payload;
+  }
 
-export function getApiBaseUrl() {
-  return process.env.API_BASE_URL ?? "http://127.0.0.1:8000/api";
-}
-
-export async function getGameNights() {
-  const apiBaseUrl = getApiBaseUrl();
-
-  try {
-    const response = await fetch(`${apiBaseUrl}/game-nights/`, {
-      next: { revalidate: 60 },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Backend returned ${response.status}`);
+  if (payload && typeof payload === "object") {
+    if ("detail" in payload && typeof payload.detail === "string") {
+      return payload.detail;
     }
 
-    const gameNights = (await response.json()) as GameNight[];
-
-    return {
-      apiAvailable: true,
-      apiBaseUrl,
-      gameNights,
-    };
-  } catch {
-    return {
-      apiAvailable: false,
-      apiBaseUrl,
-      gameNights: FALLBACK_GAME_NIGHTS,
-    };
+    for (const value of Object.values(payload)) {
+      if (Array.isArray(value) && value.length) {
+        return String(value[0]);
+      }
+    }
   }
+
+  return "Request failed.";
+}
+
+async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+  const headers = new Headers();
+
+  if (options.body) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  if (options.token) {
+    headers.set("Authorization", `Token ${options.token}`);
+  }
+
+  const response = await fetch(path, {
+    method: options.method ?? (options.body ? "POST" : "GET"),
+    headers,
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    cache: "no-store",
+  });
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const payload = (await response.json()) as T | Record<string, unknown> | string;
+
+  if (!response.ok) {
+    throw new Error(parseApiError(payload));
+  }
+
+  return payload as T;
+}
+
+export function listGameNights(token?: string) {
+  return apiRequest<GameNight[]>("/api/game-nights", { token });
+}
+
+export function joinGameNight(gameNightId: number, token: string) {
+  return apiRequest<GameNight>(`/api/game-nights/${gameNightId}/join`, {
+    method: "POST",
+    token,
+  });
+}
+
+export function createGameNight(payload: CreateGameNightPayload, token: string) {
+  return apiRequest<GameNight>("/api/game-nights", {
+    method: "POST",
+    token,
+    body: payload,
+  });
+}
+
+export function loginUser(username: string, password: string) {
+  return apiRequest<AuthResponse>("/api/auth/login", {
+    method: "POST",
+    body: { username, password },
+  });
+}
+
+export function registerUser(username: string, password: string) {
+  return apiRequest<AuthResponse>("/api/auth/register", {
+    method: "POST",
+    body: { username, password },
+  });
+}
+
+export function getCurrentUser(token: string) {
+  return apiRequest<User>("/api/auth/me", { token });
+}
+
+export function logoutUser(token: string) {
+  return apiRequest<void>("/api/auth/logout", {
+    method: "POST",
+    token,
+  });
 }
